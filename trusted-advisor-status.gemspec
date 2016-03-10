@@ -4,7 +4,7 @@ Gem::Specification.new do |s|
   s.name          = 'trusted-advisor-status'
   s.version       = '0.0.0'
   s.bindir        = 'bin'
-  s.executables   = %w(trusted-advisor-status)
+  s.executables   = %w(trusted-advisor-status wipe-trusted-advisor-history)
   s.authors       = %w(someguy)
   s.summary       = ''
   s.description   = 'Some scripting around the AWS Trusted Advisor interface for convenience in calling from pipeline'

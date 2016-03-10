@@ -1,0 +1,9 @@
+#!/usr/bin/env ruby
+require 'trollop'
+require 'results_dao'
+
+opts = Trollop::options do
+  opt :delta_name, 'Given a name here, the results will be the delta of results already stored against the name', type: :string, required: true
+end
+
+ResultsDAO.new.nuke_results opts[:delta_name]
