@@ -13,7 +13,7 @@ describe TrustedAdvisorStatus do
           @trusted_advisor_status = TrustedAdvisorStatus.new
 
           mock_error_result = double('result')
-          allow(mock_error_result).to receive(:status).and_return 'error'
+          allow(mock_error_result).to receive(:[]).with('status').and_return 'error'
 
           expect(@trusted_advisor_status).to receive(:discover_results) { [mock_error_result] }
         end
@@ -28,7 +28,7 @@ describe TrustedAdvisorStatus do
           @trusted_advisor_status = TrustedAdvisorStatus.new
 
           mock_warning_result = double('result')
-          allow(mock_warning_result).to receive(:status).and_return 'warning'
+          allow(mock_warning_result).to receive(:[]).with('status').and_return 'warning'
 
           expect(@trusted_advisor_status).to receive(:discover_results) { [mock_warning_result] }
         end
@@ -46,7 +46,7 @@ describe TrustedAdvisorStatus do
           @trusted_advisor_status = TrustedAdvisorStatus.new
 
           mock_error_result = double('result')
-          allow(mock_error_result).to receive(:status).and_return 'error'
+          allow(mock_error_result).to receive(:[]).with('status').and_return 'error'
 
           expect(@trusted_advisor_status).to receive(:discover_results) { [mock_error_result] }
         end
@@ -62,7 +62,7 @@ describe TrustedAdvisorStatus do
           @trusted_advisor_status = TrustedAdvisorStatus.new
 
           mock_warning_result = double('result')
-          allow(mock_warning_result).to receive(:status).and_return 'warning'
+          allow(mock_warning_result).to receive(:[]).with('status').and_return 'warning'
 
           expect(@trusted_advisor_status).to receive(:discover_results) { [mock_warning_result] }
         end
@@ -77,7 +77,7 @@ describe TrustedAdvisorStatus do
           @trusted_advisor_status = TrustedAdvisorStatus.new
 
           mock_ok_result = double('result')
-          allow(mock_ok_result).to receive(:status).and_return 'ok'
+          allow(mock_ok_result).to receive(:[]).with('status').and_return 'ok'
 
           expect(@trusted_advisor_status).to receive(:discover_results) { [mock_ok_result] }
         end
