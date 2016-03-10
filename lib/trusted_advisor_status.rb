@@ -39,8 +39,16 @@ class TrustedAdvisorStatus
       if prior_results.nil?
         delta_results = full_results
       else
-        delta_results = ResultsDifferencer.new.new_violations(prior: prior_results,
-                                                              current: full_results)
+        diff = ResultsDifferencer.new
+        new_violations = diff.new_violations(prior: prior_results,
+                                             current: full_results)
+        fixes = diff.fixed(prior: prior_results,
+                           current: full_results)
+
+        delta_results = {
+          'new_violation' => new_violations,
+          'fixes' => fixes
+        }
       end
       results_dao.update_prior_result(delta_name: delta_name, results: full_results)
 
@@ -50,6 +58,22 @@ class TrustedAdvisorStatus
 
   private
 
+  # resp.result.check_id #=> String
+  # resp.result.timestamp #=> String
+  # resp.result.status #=> String
+
+  # resp.result.resources_summary.resources_processed #=> Integer
+  # resp.result.resources_summary.resources_flagged #=> Integer
+  # resp.result.resources_summary.resources_ignored #=> Integer
+  # resp.result.resources_summary.resources_suppressed #=> Integer
+
+  # resp.result.flagged_resources #=> Array
+  # resp.result.flagged_resources[0].status #=> String
+  # resp.result.flagged_resources[0].region #=> String
+  # resp.result.flagged_resources[0].resource_id #=> String
+  # resp.result.flagged_resources[0].is_suppressed #=> true/false
+  # resp.result.flagged_resources[0].metadata #=> Array
+  # resp.result.flagged_resources[0].metadata[0] #=> String
   def not_ok_check_results(categories:)
 
     # the region is on purpose - support intfc is global, but can't find endpoint outside of us-east-1
@@ -92,23 +116,6 @@ class TrustedAdvisorStatus
 
       aggregate
     end
-
-    # resp.result.check_id #=> String
-    # resp.result.timestamp #=> String
-    # resp.result.status #=> String
-
-    # resp.result.resources_summary.resources_processed #=> Integer
-    # resp.result.resources_summary.resources_flagged #=> Integer
-    # resp.result.resources_summary.resources_ignored #=> Integer
-    # resp.result.resources_summary.resources_suppressed #=> Integer
-
-    # resp.result.flagged_resources #=> Array
-    # resp.result.flagged_resources[0].status #=> String
-    # resp.result.flagged_resources[0].region #=> String
-    # resp.result.flagged_resources[0].resource_id #=> String
-    # resp.result.flagged_resources[0].is_suppressed #=> true/false
-    # resp.result.flagged_resources[0].metadata #=> Array
-    # resp.result.flagged_resources[0].metadata[0] #=> String
   end
 
   def render_results(results)

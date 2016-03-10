@@ -20,10 +20,13 @@ class ResultsDifferencer
     delta = []
 
     same_check_ids.each do |check_id|
-      if prior_hash[check_id]['flagged_resources'] - current_hash[check_id]['flagged_resources'] != []
-        # be ware of pulling the rug out from under your own feet?
-        prior_hash[check_id]['flagged_resources'] -= current_hash[check_id]['flagged_resources']
-        delta << prior_hash[check_id]
+      fixed_resources = prior_hash[check_id]['flagged_resources'] - current_hash[check_id]['flagged_resources']
+      if fixed_resources != []
+        delta_result = prior_hash[check_id].dup
+        delta_result['flagged_resources'] = fixed_resources
+        delta << delta_result
+      else
+
       end
     end
 
@@ -50,10 +53,11 @@ class ResultsDifferencer
     delta = []
 
     same_check_ids.each do |check_id|
-      if current_hash[check_id]['flagged_resources'] - prior_hash[check_id]['flagged_resources'] != []
-        # be ware of pulling the rug out from under your own feet?
-        current_hash[check_id]['flagged_resources'] -= prior_hash[check_id]['flagged_resources']
-        delta << current_hash[check_id]
+      new_resources = current_hash[check_id]['flagged_resources'] - prior_hash[check_id]['flagged_resources']
+      if new_resources != []
+        delta_result = current_hash[check_id].dup
+        delta_result['flagged_resources'] = new_resources
+        delta << delta_result
       end
     end
 
