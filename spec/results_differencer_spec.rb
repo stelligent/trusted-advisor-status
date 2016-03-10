@@ -2,7 +2,7 @@ require 'spec_helper'
 require 'results_differencer'
 
 
-describe ResultsDifferencer do
+describe ResultsDifferencer, :diff do
 
   def extra_record
     json = <<-END

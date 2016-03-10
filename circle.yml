@@ -9,3 +9,7 @@ deployment:
 machine:
   ruby:
     version: '2.2.1'
+
+test:
+  override:
+    - rspec --tag @diff
