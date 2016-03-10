@@ -13,3 +13,7 @@ machine:
 #test:
 #  override:
 #    - bundle exec rspec --tag @diff
+
+general:
+  artifacts:
+    - coverage

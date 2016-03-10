@@ -38,7 +38,12 @@ to track the delta.
 
 If no delta exists, the current full baseline result is stored and used for the next delta.
 
-The fail-on-* flags will observe the new violations in a delta and ignore any "fixes".
+The fail-on-* flags will observe the new violations in a delta and ignore any "fixes"..
+
+#### DynamoDB Access
+
+The execution environment must have permission to create and update DynamoDB tables in order for "deltas" to work
+properly.
 
 ### Cleanup of Delta
 
