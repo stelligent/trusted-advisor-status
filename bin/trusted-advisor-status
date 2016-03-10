@@ -6,9 +6,10 @@ opts = Trollop::options do
   opt :categories, '', type: :strings, required: false, default: %w(security performance)
   opt :fail_on_warn, '', type: :boolean, required: false, default: false, conflicts: :fail_on_error
   opt :fail_on_error, '', type: :boolean, required: false, default: false, conflicts: :fail_on_warn
-  #opt :delta_name, 'Given a name here, the results will be the delta of results already stored against the name', type: :string, required: false,
+  opt :delta_name, 'Given a name here, the results will be the delta of results already stored against the name', type: :string, required: false
 end
 
-exit TrustedAdvisorStatus.new.check_status(categories: opts[:categories],
+exit TrustedAdvisorStatus.new.check_status categories: opts[:categories],
                                            fail_on_warn: opts[:fail_on_warn],
-                                           fail_on_error: opts[:fail_on_error])
+                                           fail_on_error: opts[:fail_on_error],
+                                           delta_name: opts[:delta_name]

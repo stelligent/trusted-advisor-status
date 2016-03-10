@@ -1,18 +1,21 @@
 require 'aws-sdk'
 require 'json'
+require_relative 'results_dao'
+require_relative 'results_differencer'
+require_relative 'hash_util'
 
 class TrustedAdvisorStatus
 
 
-  def check_status(categories:,
+  def check_status(categories: %w(security performance),
                    fail_on_warn: false,
-                   fail_on_error: false)
+                   fail_on_error: false,
+                   delta_name: nil)
 
-    results = not_ok_check_results(categories: categories)
+    results = discover_results(categories: categories,
+                               delta_name: delta_name)
 
-    json_results = jsonify(results)
-    
-    render_results(json_results)
+    render_results(results)
 
     if fail_on_error
       error_found = results.find { |result| result.status == 'error' }
@@ -24,6 +27,28 @@ class TrustedAdvisorStatus
       0
     end
   end
+
+  def discover_results(categories:, delta_name:)
+    results_dao = ResultsDAO.new
+
+    full_results = not_ok_check_results(categories: categories)
+    if delta_name.nil?
+      full_results
+    else
+      prior_results = results_dao.retrieve_prior_results delta_name: delta_name
+      if prior_results.nil?
+        delta_results = full_results
+      else
+        delta_results = ResultsDifferencer.new.new_violations(prior: prior_results,
+                                                              current: full_results)
+      end
+      results_dao.update_prior_result(delta_name: delta_name, results: full_results)
+
+      delta_results
+    end
+  end
+
+  private
 
   def not_ok_check_results(categories:)
 
@@ -43,7 +68,26 @@ class TrustedAdvisorStatus
                                                                                                      language: 'en'
 
       if describe_trusted_advisor_check_result_response.result.status != 'ok'
-        aggregate << describe_trusted_advisor_check_result_response.result
+        hash_result = describe_trusted_advisor_check_result_response.result.to_h
+
+        hash_result.delete :timestamp
+        hash_result.delete :resources_summary
+        hash_result.delete :category_specific_summary
+
+        hash_result[:description] = check.name
+
+        unless hash_result[:flagged_resources].nil?
+          hash_result[:flagged_resources] = hash_result[:flagged_resources].reject do |flagged_resource|
+            is_suppressed = flagged_resource[:is_suppressed]
+
+            flagged_resource.delete :resource_id
+            flagged_resource.delete :is_suppressed
+
+            is_suppressed
+          end
+        end
+
+        aggregate << HashUtil::stringify_keys(hash_result)
       end
 
       aggregate
@@ -67,14 +111,7 @@ class TrustedAdvisorStatus
     # resp.result.flagged_resources[0].metadata[0] #=> String
   end
 
-  private
-
-  def render_results(json_results)
-    puts json_results
-  end
-
-  def jsonify(results)
-    results_hashes = results.map { |result| result.to_h }
-    JSON.pretty_generate(results_hashes)
+  def render_results(results)
+    puts JSON.pretty_generate(results)
   end
 end
