@@ -10,6 +10,6 @@ machine:
   ruby:
     version: '2.2.1'
 
-test:
-  override:
-    - bundle exec rspec --tag @diff
+#test:
+#  override:
+#    - bundle exec rspec --tag @diff
