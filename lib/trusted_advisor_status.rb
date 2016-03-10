@@ -17,11 +17,17 @@ class TrustedAdvisorStatus
 
     render_results(results)
 
+    if results.is_a? Array
+      new_violations = results
+    elsif results.is_a? Hash
+      new_violations = results['new_violation']
+    end
+
     if fail_on_error
-      error_found = results.find { |result| result.status == 'error' }
+      error_found = new_violations.find { |result| result['status'] == 'error' }
       error_found.nil? ? 0 : 1
     elsif fail_on_warn
-      warning_fond = results.find { |result| result.status == 'error' or result.status == 'warning' }
+      warning_fond = new_violations.find { |result| result['status'] == 'error' or result['status'] == 'warning' }
       warning_fond.nil? ? 0 : 1
     else
       0
@@ -92,30 +98,35 @@ class TrustedAdvisorStatus
                                                                                                      language: 'en'
 
       if describe_trusted_advisor_check_result_response.result.status != 'ok'
-        hash_result = describe_trusted_advisor_check_result_response.result.to_h
-
-        hash_result.delete :timestamp
-        hash_result.delete :resources_summary
-        hash_result.delete :category_specific_summary
-
-        hash_result[:description] = check.name
-
-        unless hash_result[:flagged_resources].nil?
-          hash_result[:flagged_resources] = hash_result[:flagged_resources].reject do |flagged_resource|
-            is_suppressed = flagged_resource[:is_suppressed]
-
-            flagged_resource.delete :resource_id
-            flagged_resource.delete :is_suppressed
-
-            is_suppressed
-          end
-        end
-
-        aggregate << HashUtil::stringify_keys(hash_result)
+        aggregate << convert_check_result_into_hash(check.name,
+                                                    describe_trusted_advisor_check_result_response.result)
       end
 
       aggregate
     end
+  end
+
+  def convert_check_result_into_hash(check_name, check_result)
+    hash_result = check_result.to_h
+
+    hash_result.delete :timestamp
+    hash_result.delete :resources_summary
+    hash_result.delete :category_specific_summary
+
+    hash_result[:description] = check_name
+
+    unless hash_result[:flagged_resources].nil?
+      hash_result[:flagged_resources] = hash_result[:flagged_resources].reject do |flagged_resource|
+        is_suppressed = flagged_resource[:is_suppressed]
+
+        flagged_resource.delete :resource_id
+        flagged_resource.delete :is_suppressed
+
+        is_suppressed
+      end
+    end
+
+    HashUtil::stringify_keys(hash_result)
   end
 
   def render_results(results)
